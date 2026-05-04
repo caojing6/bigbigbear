@@ -1,0 +1,36 @@
+name: Deploy to Tencent COS
+
+on:
+  push:
+    branches: [ "main" ] # 当代码推送到 main 分支时，自动触发部署
+  workflow_dispatch:    # 允许你在 GitHub 网页上手动点击运行
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest # 使用一个干净的 Linux 虚拟机器来执行任务
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4 # 第一步：把你的仓库代码下载到虚拟机器里
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # 第二步：安装 Node.js 环境（VitePress 等现代前端工具都需要）
+
+      - name: Install dependencies & Build
+        run: |
+          npm install # 根据你的项目，可能是 npm install 或 pnpm install
+          npm run build # 根据你的项目，可能是 npm run build 或 pnpm run build
+        # 如果你的项目不需要安装依赖就能直接构建，可以删除 npm install 这一行
+        # 如果构建命令不是 npm run build，请修改为你项目的实际构建命令（比如 pnpm docs:build）
+
+      - name: Upload to COS
+        uses: tencentcloud/cos-action@v1 # 第三步：使用腾讯云官方的 COS 上传插件
+        with:
+          secret_id: ${{ secrets.TENCENT_SECRET_ID }}
+          secret_key: ${{ secrets.TENCENT_SECRET_KEY }}
+          cos_bucket: ${{ secrets.COS_BUCKET }}
+          cos_region: ${{ secrets.COS_REGION }}
+          local_path: dist # 第四步：告诉插件要把哪个文件夹传上去（通常是 dist 或 .vitepress/dist）
+          remote_path: /    # 第五步：传送到 COS 的根目录
+          clean: true       # 第六步：上传前清空 COS 里的旧文件，保证版本纯净
