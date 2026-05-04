@@ -31,6 +31,6 @@ jobs:
           secret_key: ${{ secrets.TENCENT_SECRET_KEY }}
           cos_bucket: ${{ secrets.COS_BUCKET }}
           cos_region: ${{ secrets.COS_REGION }}
-          local_path: dist # 第四步：告诉插件要把哪个文件夹传上去（通常是 dist 或 .vitepress/dist）
+          local_path: .vitepress/dist # 第四步：告诉插件要把哪个文件夹传上去（通常是 dist 或 .vitepress/dist）
           remote_path: /    # 第五步：传送到 COS 的根目录
           clean: true       # 第六步：上传前清空 COS 里的旧文件，保证版本纯净
